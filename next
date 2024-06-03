@@ -1,0 +1,85 @@
+#!/bin/bash
+
+ERROR_COUNT=`cat .state/error-count`
+MOVE_COUNT=`cat .state/move-count`
+TARGET_SPACE=`cat .state/target-space`
+CURRENT_SPACE=$(git show --pretty=format:%s -s HEAD)
+
+wrong_space () {
+  IS_NUMBER='^[0-9]+$'
+
+  ((ERROR_COUNT+=1))
+  echo "${ERROR_COUNT}" > .state/error-count
+  echo $'\n'
+
+  echo $CURRENT_SPACE
+  if [[ ! "${CURRENT_SPACE}" =~ "${IS_NUMBER}" ]]; then
+    echo "Oops, you're not on a space right now"
+  else
+    echo "You're on space ${CURRENT_SPACE}, but need to be on space ${TARGET_SPACE}"
+  fi
+  
+  exit 1
+}
+
+victory () {
+  if [[ ERROR_COUNT -eq 0 ]]; then
+    echo "You won in ${MOVE_COUNT} moves with no mistakes!"
+    echo $'\n\n'
+  else
+    echo "You won in ${MOVE_COUNT} moves with ${ERROR_COUNT} mistakes. Run ./new-game to try again!"
+    echo $'\n\n'
+  fi
+
+  exit 0
+}
+
+next_move () {
+  SPACE="${1}"
+  NEXT_SPACE_DELTA=$(echo "${SPACE}" | cut -d "," -f 2)
+  OPERATOR=$(printf %.1s "${NEXT_SPACE_DELTA}")
+
+  if [[ "${OPERATOR}" == '0' ]]; then
+    ROLL="$(( ${RANDOM} % 12 + 1 ))"
+
+    if [[ "(( ${CURRENT_SPACE} + ${ROLL} ))" -ge 100 ]]; then
+      ROLL="$(( 100 - ${CURRENT_SPACE} ))"
+    fi
+
+    TARGET_SPACE="$((${CURRENT_SPACE}+${ROLL}))"
+    echo "You keep hiking, move to space ${TARGET_SPACE}"
+  elif [[ "${OPERATOR}" == '+' ]]; then
+    TARGET_SPACE="$(($CURRENT_SPACE$NEXT_SPACE_DELTA))"
+    echo "You found a shortcut! Go to space ${TARGET_SPACE}"
+  elif [[ "${OPERATOR}" == '-' ]]; then
+    TARGET_SPACE="$(($CURRENT_SPACE$NEXT_SPACE_DELTA))"
+    echo "Oh no, you stumbled! Go to space ${TARGET_SPACE}"
+  fi
+
+  echo "${TARGET_SPACE}" > .state/target-space
+  echo $'\n'
+
+  ((MOVE_COUNT+=1))
+  echo "${MOVE_COUNT}" > .state/move-count
+}
+
+check_current_space () {
+  if [[ CURRENT_SPACE -ne TARGET_SPACE ]]; then
+    wrong_space "${CURRENT_SPACE}" "${TARGET_SPACE}"
+  fi
+
+  if [[ CURRENT_SPACE -ge 100 ]]; then
+    victory
+  fi
+}
+
+####################
+
+check_current_space
+
+for SPACE in $(cat .seed/spaces); do
+  SPACE_NUMBER=$(echo "${SPACE}" | cut -d "," -f 1)
+  if [[ "${SPACE_NUMBER}" == "${CURRENT_SPACE}" ]]; then
+    next_move "${SPACE}"
+  fi
+done

@@ -1,0 +1,45 @@
+#!/bin/bash
+
+clear_state() {
+  git checkout -q main
+  git update-ref -d refs/heads/hike
+  git update-ref -d refs/tags/list
+  git update-ref -d refs/tags/start
+
+  rm -rf .state
+  mkdir .state
+  echo "0" > .state/move-count
+  echo "0" > .state/error-count
+  echo "0" > .state/target-space
+}
+
+initialize_game() {
+  git checkout -q main
+  git checkout -q -b hike
+
+  git commit -q --allow-empty -m "0"
+  git tag -a -m "Start the game here" start &>/dev/null
+
+  for NUMBER in {1..100}; do
+    git commit -q --allow-empty -m "$NUMBER"
+  done
+
+  git commit -q --allow-empty -m "This can see all commits"
+  git tag -a -m "This can see all commits" list &>/dev/null
+
+
+  git reset -q --hard start
+}
+
+####################
+
+clear_state
+initialize_game
+
+echo "*************"
+echo "HIKE DISASTER"
+echo "*************"
+echo -e "\n"
+echo "You start hiking!"
+
+./next
