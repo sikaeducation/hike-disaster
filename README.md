@@ -1,4 +1,7 @@
-# Git Chutes and Ladders
+# Hike Disaster
+
+You decide to go on a hike in the beautiful Rocky Mountains, but you don't bring
+the right gear and things go poorly.
 
 This game is a Git version of Chutes and Ladders that gives you an opportunity
 to practice using `reset --hard` to move the Git HEAD back and forth along a
