@@ -8,8 +8,8 @@ to practice using `git reset --hard` to move the Git HEAD back and forth along a
 single branch.
 
 1. Fork and clone this repository
-2. Run `./initialize-commits.sh` to set up the project
-3. Run `./new-game` to begin the game
+2. Run `./initialize-commits.sh` to set up the project.
+3. Run `./new-game` to begin the game.
 4. Roll the virtual dice by running `./roll`, then move the current Git HEAD to
    the indicated commit. Repeat until you're on the 100th space.
 5. When you get to the 100th space and roll, you've won! Commit `results` and
@@ -25,3 +25,5 @@ single branch.
 - You can restart the game by running `.new-game` again.
 
 # `git reset --hard` IRL
+
+Game 2: [Hike Research](https://github.com/sikaeducation/hike-research)
